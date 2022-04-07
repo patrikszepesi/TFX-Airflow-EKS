@@ -42,9 +42,9 @@ COPY --chown=airflow:root penguin_trainer.py /opt/airflow/dags
 
 
 #helm upgrade $RELEASE_NAME apache-airflow/airflow --namespace $NAMESPACE \
- #   --set images.airflow.repository=patrik117/airflow-vanillia \
-  #  --set images.airflow.tag=2v12
-   #  --timeout 10m30s
+ #  --set images.airflow.repository=patrik117/airflow-vanillia \
+  #  --set images.airflow.tag=2v42
+    #2v41 works!!!!!!!!!!!!
 
 
     #kubectl port-forward svc/$RELEASE_NAME-webserver 8080:8080 --namespace $NAMESPACE

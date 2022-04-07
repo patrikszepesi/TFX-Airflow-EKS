@@ -5,6 +5,18 @@ import datetime
 from random import randint
 import tfx
 from tfx import v1 as tfx
+#from tfx.types import standard_artifacts
+from tfx import types
+from tfx.types.component_spec import ChannelParameter
+from tfx.types.component_spec import ExecutionParameter
+from tfx.dsl.components.base import base_component
+from tfx.dsl.components.base import base_executor
+from typing import Any, Dict, List, Text, Optional
+from tfx.dsl.components.base import executor_spec
+from tfx.types import channel_utils
+from tfx.types import standard_artifacts
+
+
 
 import urllib.request
 import tempfile
@@ -60,6 +72,56 @@ def _create_pipeline(pipeline_name: str, pipeline_root: str, data_root: str,
   # Brings data into the pipeline.
   example_gen = tfx.components.CsvExampleGen(input_base=data_root)
 
+  class HelloComponentSpec(types.ComponentSpec):
+      """ComponentSpec for Custom TFX Hello World Component."""
+
+      PARAMETERS = {
+          # These are parameters that will be passed in the call to
+          # create an instance of this component.
+          'name': ExecutionParameter(type=str),
+      }
+      INPUTS = {
+          # This will be a dictionary with input artifacts, including URIs
+          'input_data': ChannelParameter(type=standard_artifacts.Examples),
+      }
+      OUTPUTS = {
+          # This will be a dictionary which this component will populate
+          'output_data': ChannelParameter(type=standard_artifacts.Examples),
+      }
+
+  class Executor(base_executor.BaseExecutor):
+      """Executor for HelloComponent."""
+
+      def Do(self, input_dict: Dict[Text, List[types.Artifact]],
+             output_dict: Dict[Text, List[types.Artifact]],
+             exec_properties: Dict[Text, Any]) -> None:
+
+
+          split_to_instance = "Hello World"
+          print(split_to_instance)
+
+  class HelloComponent(base_component.BaseComponent):
+      """Custom TFX Hello World Component."""
+
+      SPEC_CLASS = HelloComponentSpec
+      EXECUTOR_SPEC = executor_spec.ExecutorClassSpec(Executor)
+
+      def __init__(self,
+                   input_data: types.Channel = None,
+                   output_data: types.Channel = None,
+                   name: Optional[Text] = None):
+          if not output_data:
+              output_data = channel_utils.as_channel([standard_artifacts.Examples()])
+
+          spec = HelloComponentSpec(input_data=input_data,
+                                    output_data=output_data, name=name)
+          super(HelloComponent, self).__init__(spec=spec)
+
+
+  hello = HelloComponent(
+          input_data=example_gen.outputs['examples'], name='HelloWorld')
+
+
   # Uses user-provided Python function that trains a model.
   trainer = tfx.components.Trainer(
       module_file=module_file,
@@ -77,6 +139,7 @@ def _create_pipeline(pipeline_name: str, pipeline_root: str, data_root: str,
   # Following three components will be included in the pipeline.
   components = [
       example_gen,
+      hello,
       trainer,
       pusher,
   ]
@@ -88,7 +151,7 @@ def _create_pipeline(pipeline_name: str, pipeline_root: str, data_root: str,
       .sqlite_metadata_connection_config(metadata_path),
       components=components)
 
-
+#nohup kubectl port-forward svc/$RELEASE_NAME-webserver 8080:8080 --namespace $NAMESPACE &
 
 #DAG=tfx.orchestration.LocalDagRunner().run(
  # _create_pipeline(
