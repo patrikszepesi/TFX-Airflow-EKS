@@ -10,17 +10,21 @@
 #  && apt-get clean \
 #  && rm -rf /var/lib/apt/lists/*
 #USER airflow
-FROM apache/airflow:2.2.3
-RUN python3 -m pip install --upgrade pip
+
+
+FROM apache/airflow:2.2.3-python3.8
+RUN python -m pip install --upgrade pip
 COPY requirements.txt /requirements.txt
 RUN pip install --user --upgrade pip
 RUN pip install --no-cache-dir --user -r /requirements.txt
+#RUN pip3 install tfx
+#RUN pip install pyvim
 USER airflow
 COPY --chown=airflow:root airflow_script.py /opt/airflow/dags
 COPY --chown=airflow:root penguin_trainer.py /opt/airflow/dags
 
 
-
+#https://githubhot.com/repo/airflow-helm/charts/issues/206
 
 
 # docker run --rm -ti --platform linux/arm/v7 ubuntu:latest uname -m armv7l
@@ -45,8 +49,3 @@ COPY --chown=airflow:root penguin_trainer.py /opt/airflow/dags
  #  --set images.airflow.repository=patrik117/airflow-vanillia \
   #  --set images.airflow.tag=2v42
     #2v41 works!!!!!!!!!!!!
-
-
-    #kubectl port-forward svc/$RELEASE_NAME-webserver 8080:8080 --namespace $NAMESPACE
-
-

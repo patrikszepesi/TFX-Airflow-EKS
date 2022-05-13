@@ -18,9 +18,9 @@ _LABEL_KEY = 'species'
 _TRAIN_BATCH_SIZE = 20
 _EVAL_BATCH_SIZE = 10
 
-# Since we're not generating or creating a schema, we will instead create
+
 # a feature spec.  Since there are a fairly small number of features this is
-# manageable for this dataset.
+
 _FEATURE_SPEC = {
     **{
         feature: tf.io.FixedLenFeature(shape=[1], dtype=tf.float32)
@@ -60,8 +60,8 @@ def _build_keras_model() -> tf.keras.Model:
   Returns:
     A Keras Model.
   """
-  # The model below is built with Functional API, please refer to
-  # https://www.tensorflow.org/guide/keras/overview for all API options.
+
+
   inputs = [keras.layers.Input(shape=(1,), name=f) for f in _FEATURE_KEYS]
   d = keras.layers.concatenate(inputs)
   for _ in range(2):
@@ -86,11 +86,7 @@ def run_fn(fn_args: tfx.components.FnArgs):
     fn_args: Holds args used to train the model as name/value pairs.
   """
 
-  # This schema is usually either an output of SchemaGen or a manually-curated
-  # version provided by pipeline author. A schema can also derived from TFT
-  # graph if a Transform component is used. In the case when either is missing,
-  # `schema_from_feature_spec` could be used to generate schema from very simple
-  # feature_spec, but the schema returned would be very primitive.
+
   schema = schema_utils.schema_from_feature_spec(_FEATURE_SPEC)
 
   train_dataset = _input_fn(
@@ -111,6 +107,6 @@ def run_fn(fn_args: tfx.components.FnArgs):
       validation_data=eval_dataset,
       validation_steps=fn_args.eval_steps)
 
-  # The result of the training should be saved in `fn_args.serving_model_dir`
-  # directory.
+  #result of the training should be saved in `fn_args.serving_model_dir`
+
   model.save(fn_args.serving_model_dir, save_format='tf')

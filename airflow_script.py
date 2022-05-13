@@ -28,16 +28,22 @@ PIPELINE_NAME = "penguin-simple"
 _pipeline_name="penguin-simple"
 
 # Output directory to store artifacts generated from the pipeline.
-PIPELINE_ROOT = os.path.join('pipelines', PIPELINE_NAME)
-_pipeline_root = os.path.join('pipelines', _pipeline_name)
+PIPELINE_ROOT = os.path.join(os.path.abspath('/tmp/data/'),'pipelines', PIPELINE_NAME)
+_pipeline_root = os.path.join(os.path.abspath('/tmp/data/'),'pipelines', _pipeline_name)
+#PIPELINE_ROOT = os.path.join('pipelines', PIPELINE_NAME)
+#_pipeline_root = os.path.join('pipelines', _pipeline_name)
 
 # Path to a SQLite DB file to use as an MLMD storage.
-METADATA_PATH = os.path.join('metadata', PIPELINE_NAME, 'metadata.db')
-_metadata_path = os.path.join('metadata', PIPELINE_NAME, 'metadata.db')
+METADATA_PATH = os.path.join(os.path.abspath('/tmp/data/'),'metadata', PIPELINE_NAME, 'metadata.db')
+_metadata_path = os.path.join(os.path.abspath('/tmp/data/'),'metadata', PIPELINE_NAME, 'metadata.db')
+#METADATA_PATH = os.path.join('metadata', PIPELINE_NAME, 'metadata.db')
+#_metadata_path = os.path.join('metadata', PIPELINE_NAME, 'metadata.db')
 
 # Output directory where created models from the pipeline will be exported.
-SERVING_MODEL_DIR = os.path.join('serving_model', PIPELINE_NAME)
-_serving_model_dir = os.path.join('serving_model', _pipeline_name)
+SERVING_MODEL_DIR = os.path.join(os.path.abspath('/tmp/data/'), 'serving_model', PIPELINE_NAME)
+_serving_model_dir = os.path.join(os.path.abspath('/tmp/data/'), 'serving_model', _pipeline_name)
+#SERVING_MODEL_DIR = os.path.join('serving_model', PIPELINE_NAME)
+#_serving_model_dir = os.path.join('serving_model', _pipeline_name)
 
 
 from absl import logging
@@ -76,16 +82,16 @@ def _create_pipeline(pipeline_name: str, pipeline_root: str, data_root: str,
       """ComponentSpec for Custom TFX Hello World Component."""
 
       PARAMETERS = {
-          # These are parameters that will be passed in the call to
+          #  parameters that will be passed in the call to
           # create an instance of this component.
           'name': ExecutionParameter(type=str),
       }
       INPUTS = {
-          # This will be a dictionary with input artifacts, including URIs
+          #  dictionary with input artifacts, including URIs
           'input_data': ChannelParameter(type=standard_artifacts.Examples),
       }
       OUTPUTS = {
-          # This will be a dictionary which this component will populate
+          #  dictionary which this component will populate
           'output_data': ChannelParameter(type=standard_artifacts.Examples),
       }
 
@@ -122,7 +128,7 @@ def _create_pipeline(pipeline_name: str, pipeline_root: str, data_root: str,
           input_data=example_gen.outputs['examples'], name='HelloWorld')
 
 
-  # Uses user-provided Python function that trains a model.
+  #  user-provided Python function that trains a model.
   trainer = tfx.components.Trainer(
       module_file=module_file,
       examples=example_gen.outputs['examples'],
@@ -151,7 +157,7 @@ def _create_pipeline(pipeline_name: str, pipeline_root: str, data_root: str,
       .sqlite_metadata_connection_config(metadata_path),
       components=components)
 
-#nohup kubectl port-forward svc/$RELEASE_NAME-webserver 8080:8080 --namespace $NAMESPACE &
+
 
 #DAG=tfx.orchestration.LocalDagRunner().run(
  # _create_pipeline(
@@ -172,4 +178,3 @@ DAG = AirflowDagRunner(AirflowPipelineConfig(_airflow_config)).run(
     module_file=_trainer_module_file,
     serving_model_dir=SERVING_MODEL_DIR,
     metadata_path=METADATA_PATH))
-
